@@ -19,8 +19,27 @@ npm install -g mdns-wifi-location
 ## Usage
 
 ```
-todo
+Usage:
+    announce-wifi-location-via-mdns <latitude> <longitude> [options]
+Options:
+    --altitude            -a  Altitude of your network, in meters.
+                                Default: none
+    --size                -s  Size of your network, in meters.
+                                Default: 20
+    --precision           -p  Horizontal precision of the coordinates, in meters.
+                                Default: none
+    --vertical-precision  -P  Vertical precision of the coordinates, in meters.
+                                Default: none
+Examples:
+    announce-wifi-location-via-mdns 1.23 2.34 --altitude 800 -s 30
 ```
+
+
+## Related
+
+- [`LOC` record – Wikipedia](https://en.wikipedia.org/wiki/LOC_record)
+- [RFC 1876: A Means for Expressing Location Information in the Domain Name System](https://tools.ietf.org/rfc/rfc1876) (defines `LOC` DNS entries)
+- [*The weird and wonderful world of DNS LOC records* – The Cloudflare Blog](https://blog.cloudflare.com/the-weird-and-wonderful-world-of-dns-loc-records/) (a story about Cloudflare adding `LOC` support)
 
 
 ## Contributing
