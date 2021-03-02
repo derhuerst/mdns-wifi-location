@@ -14,10 +14,8 @@ const argv = mri(process.argv.slice(2), {
 if (argv.help || argv.h) {
 	process.stdout.write(`
 Usage:
-    announce-wifi-location-via-mdns <latitude> <longitude> [options]
+    announce-wifi-location-via-mdns <latitude> <longitude> <altitude> [options]
 Options:
-    --altitude            -a  Altitude of your network, in meters.
-                                Default: none
     --size                -s  Size of your network, in meters.
                                 Default: 20
     --precision           -p  Horizontal precision of the coordinates, in meters.
@@ -36,6 +34,7 @@ if (argv.version || argv.v) {
 }
 
 const initMdns = require('multicast-dns')
+const encodeLocAnswer = require('./lib/encode-loc-answer')
 
 const showError = (err) => {
 	console.error(err)
@@ -46,16 +45,13 @@ const latitude = parseFloat(argv._[0])
 if ('number' !== typeof latitude) {
 	showError('Missing/invalid latitude argument.')
 }
-const longitude = parseFloat(argv._[0])
+const longitude = parseFloat(argv._[1])
 if ('number' !== typeof longitude) {
 	showError('Missing/invalid longitude argument.')
 }
-
-const altitude = argv.altitude || argv.a
-	? parseFloat(argv.altitude || argv.a)
-	: null
-if (altitude !== null && 'number' !== typeof altitude) {
-	showError('Invalid altitude option.')
+const altitude = parseFloat(argv._[2])
+if ('number' !== typeof altitude) {
+	showError('Missing/invalid altitude argument.')
 }
 
 const size = argv.size || argv.s
@@ -78,7 +74,11 @@ if (vPrecision !== null && 'number' !== typeof vPrecision) {
 	showError('Invalid vPrecision option.')
 }
 
-const data = Buffer.alloc(0)
+const data = encodeLocAnswer({
+	latitude, longitude, altitude,
+	size,
+	hPrecision, vPrecision,
+})
 
 const mdns = initMdns()
 
