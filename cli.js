@@ -1,8 +1,7 @@
 #!/usr/bin/env node
-'use strict'
 
-const mri = require('mri')
-const pkg = require('./package.json')
+import mri from 'mri'
+import pkg from './package.json' with {type: 'json'}
 
 const argv = mri(process.argv.slice(2), {
 	boolean: [
@@ -33,8 +32,8 @@ if (argv.version || argv.v) {
 	process.exit(0)
 }
 
-const initMdns = require('multicast-dns')
-const encodeLocAnswer = require('./lib/encode-loc-answer')
+import initMdns from 'multicast-dns'
+import {encodeLOCAnswer} from './lib/encode-loc-answer.js'
 
 const showError = (err) => {
 	console.error(err)
@@ -74,7 +73,7 @@ if (vPrecision !== null && 'number' !== typeof vPrecision) {
 	showError('Invalid vPrecision option.')
 }
 
-const data = encodeLocAnswer({
+const data = encodeLOCAnswer({
 	latitude, longitude, altitude,
 	size,
 	hPrecision, vPrecision,

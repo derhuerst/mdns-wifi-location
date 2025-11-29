@@ -2,6 +2,7 @@
 	"name": "mdns-wifi-location",
 	"description": "Announce a WiFi's geolocation via mDNS.",
 	"version": "1.0.0",
+	"type": "module",
 	"bin": {
 		"announce-wifi-location-via-mdns": "./cli.js"
 	},
@@ -24,7 +25,7 @@
 	"bugs": "https://github.com/derhuerst/mdns-wifi-location/issues",
 	"license": "ISC",
 	"engines": {
-		"node": ">=12"
+		"node": ">=24"
 	},
 	"dependencies": {
 		"mri": "^1.1.6",
