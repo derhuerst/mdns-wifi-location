@@ -21,6 +21,16 @@ Options:
                                 Default: none
     --vertical-precision  -P  Vertical precision of the coordinates, in meters.
                                 Default: none
+    --json-via-stdin      -j  Read newline-delimited JSON from stdin. Each line may
+                                may have the these fields:
+                                - latitude
+                                - lonitude
+                                - altitude
+                                - size
+                                - hPrecision
+                                - vPrecision
+                                If a line does not have a field, its previous value
+                                is used.
 Examples:
     announce-wifi-location-via-mdns 1.23 2.34 --altitude 800 -s 30
 \n`)
@@ -33,6 +43,7 @@ if (argv.version || argv.v) {
 }
 
 import initMdns from 'multicast-dns'
+import {createInterface as createReadlineInterface} from 'node:readline'
 import {encodeLOCAnswer} from './lib/encode-loc-answer.js'
 
 const showError = (err) => {
@@ -40,56 +51,78 @@ const showError = (err) => {
 	process.exit(1)
 }
 
-const latitude = parseFloat(argv._[0])
+let latitude = parseFloat(argv._[0])
 if ('number' !== typeof latitude) {
 	showError('Missing/invalid latitude argument.')
 }
-const longitude = parseFloat(argv._[1])
+let longitude = parseFloat(argv._[1])
 if ('number' !== typeof longitude) {
 	showError('Missing/invalid longitude argument.')
 }
-const altitude = parseFloat(argv._[2])
+let altitude = parseFloat(argv._[2])
 if ('number' !== typeof altitude) {
 	showError('Missing/invalid altitude argument.')
 }
 
-const size = argv.size || argv.s
+let size = argv.size || argv.s
 	? parseFloat(argv.size || argv.s)
 	: null
 if (size !== null && 'number' !== typeof size) {
 	showError('Invalid size option.')
 }
 
-const hPrecision = argv['horizontal-precision'] || argv.p
+let hPrecision = argv['horizontal-precision'] || argv.p
 	? parseFloat(argv['horizontal-precision'] || argv.p)
 	: null
 if (hPrecision !== null && 'number' !== typeof hPrecision) {
 	showError('Invalid hPrecision option.')
 }
-const vPrecision = argv['vertical-precision'] || argv.P
+let vPrecision = argv['vertical-precision'] || argv.P
 	? parseFloat(argv['vertical-precision'] || argv.P)
 	: null
 if (vPrecision !== null && 'number' !== typeof vPrecision) {
 	showError('Invalid vPrecision option.')
 }
 
-const data = encodeLOCAnswer({
-	latitude, longitude, altitude,
-	size,
-	hPrecision, vPrecision,
-})
+let recordData
+const recomputeRecordData = () => {
+	recordData = encodeLOCAnswer({
+		latitude, longitude, altitude,
+		size,
+		hPrecision, vPrecision,
+	})
+}
+recomputeRecordData()
 
 const mdns = initMdns()
 
 mdns.on('query', (q) => {
-	const question = q.questions.find(q => q.name === 'local' && q.type === 'LOC')
+	const question = q.questions.find(q => q.name === 'local' && q.type === 'LOC' && q.class === 'IN')
 	if (!question) return;
 
 	mdns.respond({
 		answers: [{
 			name: 'local',
 			type: 'LOC',
-			data,
+			class: 'IN',
+			data: recordData,
 		}],
 	})
 })
+
+if (argv['json-via-stdin'] || argv.j) {
+	const lines = createReadlineInterface({
+		input: process.stdin,
+		crlfDelay: Infinity,
+	})
+	for await (const line of lines) {
+		const _ = JSON.parse(line)
+		if ('latitude' in _) latitude = _.latitude
+		if ('longitude' in _) longitude = _.longitude
+		if ('altitude' in _) altitude = _.altitude
+		if ('size' in _) size = _.size
+		if ('hPrecision' in _) hPrecision = _.hPrecision
+		if ('vPrecision' in _) vPrecision = _.vPrecision
+		recomputeRecordData()
+	}
+}

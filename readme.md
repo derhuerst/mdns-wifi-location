@@ -28,6 +28,16 @@ Options:
                                 Default: none
     --vertical-precision  -P  Vertical precision of the coordinates, in meters.
                                 Default: none
+    --json-via-stdin      -j  Read newline-delimited JSON from stdin. Each line may
+                                may have the these fields:
+                                - latitude
+                                - lonitude
+                                - altitude
+                                - size
+                                - hPrecision
+                                - vPrecision
+                                If a line does not have a field, its previous value
+                                is used.
 Examples:
     announce-wifi-location-via-mdns 1.23 2.34 --altitude 800 -s 30
 ```
