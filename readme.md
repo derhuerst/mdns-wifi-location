@@ -20,10 +20,8 @@ npm install -g mdns-wifi-location
 
 ```
 Usage:
-    announce-wifi-location-via-mdns <latitude> <longitude> [options]
+    announce-wifi-location-via-mdns <latitude> <longitude> <altitude> [options]
 Options:
-    --altitude            -a  Altitude of your network, in meters.
-                                Default: none
     --size                -s  Size of your network, in meters.
                                 Default: 20
     --precision           -p  Horizontal precision of the coordinates, in meters.
